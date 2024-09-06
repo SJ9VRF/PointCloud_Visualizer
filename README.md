@@ -10,3 +10,6 @@ PointCloudVisualizer_class
 <img width="448" alt="Screenshot 2024-09-05 at 8 28 13 PM" src="https://github.com/user-attachments/assets/c0fd9033-c87c-4ba0-8841-df6b61fb9560">
 
 
+PointCloudVisualizer_laspy
+
+<img width="410" alt="Screenshot 2024-09-05 at 8 33 12 PM" src="https://github.com/user-attachments/assets/7fb951c9-532d-4bfe-bfaf-dcff0a1640d0">
