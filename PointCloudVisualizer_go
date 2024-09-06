@@ -1,0 +1,111 @@
+import laspy
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+import matplotlib.pyplot as plt
+
+
+class PointCloudVisualizer:
+    def __init__(self, file_path):
+        """
+        Initializes the PointCloudVisualizer class.
+
+        Args:
+            file_path (str): The path to the .las file.
+        """
+        self.file_path = file_path
+        self.point_cloud = None
+        self.point_classes = None
+
+    def load_las_file(self):
+        """
+        Loads the .las file and extracts the point cloud data and class information.
+        """
+        # Open the .las file
+        las = laspy.read(self.file_path)
+
+        # Extract point coordinates (X, Y, Z)
+        points = np.vstack((las.x, las.y, las.z)).transpose()
+
+        # Extract point classes
+        point_classes = las.classification
+
+        # Store the points and classes
+        self.point_cloud = points
+        self.point_classes = point_classes
+
+    def get_color_map(self):
+        """
+        Generates a colormap for each point class.
+
+        Returns:
+            np.ndarray: An array of RGB colors for each point.
+        """
+        # Unique classes
+        unique_classes = np.unique(self.point_classes)
+
+        # Generate a colormap (using matplotlib's 'tab20' for distinct colors)
+        cmap = plt.get_cmap('tab20', len(unique_classes))
+
+        # Create a dictionary to map each class to a color
+        class_color_map = {cls: cmap(i)[:3] for i, cls in enumerate(unique_classes)}
+
+        # Assign colors to each point based on its class
+        colors = np.array([class_color_map[cls] for cls in self.point_classes])
+
+        return colors
+
+    def visualize(self):
+        """
+        Visualizes the point cloud in an interactive mode using Plotly with color coding for point classes.
+        """
+        if self.point_cloud is None or self.point_classes is None:
+            raise ValueError("No point cloud loaded. Please run `load_las_file()` first.")
+
+        # Get colors for the point cloud based on classes
+        colors = self.get_color_map()
+
+        # Convert colors to hexadecimal for Plotly
+        colors_hex = ['rgb({},{},{})'.format(int(r * 255), int(g * 255), int(b * 255)) for r, g, b in colors]
+
+        # Create a 3D scatter plot using Plotly
+        fig = go.Figure(data=[go.Scatter3d(
+            x=self.point_cloud[:, 0],  # X-coordinates
+            y=self.point_cloud[:, 1],  # Y-coordinates
+            z=self.point_cloud[:, 2],  # Z-coordinates
+            mode='markers',
+            marker=dict(
+                size=2,  # Size of the points
+                color=colors_hex,  # Color of the points based on classes
+                opacity=0.8
+            )
+        )])
+
+        # Update layout for a better 3D view
+        fig.update_layout(
+            scene=dict(
+                xaxis_title='X',
+                yaxis_title='Y',
+                zaxis_title='Z'
+            ),
+            margin=dict(l=0, r=0, b=0, t=0)  # No margin
+        )
+
+        # Show the plot
+        pio.show(fig)
+
+
+# Example Usage:
+# Create the visualizer object
+if __name__ == "__main__":
+    # Code to execute when the script is run directly
+
+    las_file_path = ""
+
+    visualizer = PointCloudVisualizer(las_file_path)
+
+    # Load the .las file
+    visualizer.load_las_file()
+
+    # Visualize the point cloud with class-specific colors
+    visualizer.visualize()
